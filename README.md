@@ -126,6 +126,7 @@ INFO: JOB COMPLETED SUCCESSFULLY
 
 
 ### run pipeline-example-deploy job
+
 $ jpipes example-deploy
 INFO: WAITING FOR JOB TO START: https://jenkins.example.com/queue/item/571/api/json
 INFO: JOB STARTED: https://jenkins.example.com/job/pipeline-example-deploy/1/
@@ -207,7 +208,7 @@ Configuration files are looked for in the following order:
 The above allows you to set global Jenkins settings (url, creds, etc) but
 have project-local based overrides (i.e. `prefix`):
 
-**jenkins/jpipes.yml**:
+**my-project-root/jenkins/jpipes.yml**:
 
 ```yaml
 ---
