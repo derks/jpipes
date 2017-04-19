@@ -26,6 +26,7 @@ class JPipesApp(CementApp):
             os.path.join('jenkins', 'jpipes.yml')
         ]
         enable_framework_logging = False
+        exit_on_close = True
 
 class JPipesTestApp(JPipesApp):
     """A test app that is better suited for testing."""
