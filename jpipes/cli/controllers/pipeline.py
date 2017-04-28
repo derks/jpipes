@@ -39,6 +39,8 @@ class PipelineController(ArgparseController):
 
         self.app.log.info('WAITING FOR JOB TO START: %s/api/json' % \
                           build_res.headers['Location'].rstrip('/'))
+        self.app.log.info('THIS PROCESS CAN BE SAFELY EXITED [CTRL-C]')
+
         while True:
             path = "%s/api/json" % build_res.headers['Location'].rstrip('/')
             q_res = self.app.api.get(path).json()
@@ -53,28 +55,28 @@ class PipelineController(ArgparseController):
                 sleep(1)
 
         self.app.log.info("JOB STARTED: %s" % q_res['executable']['url'])
+        if not self.app.pargs.detach:
+            offset = 0
+            while True:
+                log_url = "%s/logText/progressiveText?start=%s" % (
+                            q_res['executable']['url'],
+                            offset
+                            )
+                log_res = self.app.api.get(log_url)
+                
+                if len(log_res.text):
+                    print(log_res.text)
 
-        offset = 0
-        while True:
-            log_url = "%s/logText/progressiveText?start=%s" % (
-                        q_res['executable']['url'],
-                        offset
-                        )
-            log_res = self.app.api.get(log_url)
-            
-            if len(log_res.text):
-                print(log_res.text)
+                if 'X-More-Data' in log_res.headers:
+                    offset = log_res.headers['X-Text-Size']
+                    sleep(self._meta.console_log_poll_interval)
+                else:
+                    break
 
-            if 'X-More-Data' in log_res.headers:
-                offset = log_res.headers['X-Text-Size']
-                sleep(self._meta.console_log_poll_interval)
+            path = "%s/api/json" % q_res['executable']['url']
+            job_res = self.app.api.get(path).json()
+            if job_res['result'] == 'SUCCESS': 
+                self.app.log.info('JOB COMPLETED SUCCESSFULLY')
             else:
-                break
-
-        path = "%s/api/json" % q_res['executable']['url']
-        job_res = self.app.api.get(path).json()
-        if job_res['result'] == 'SUCCESS': 
-            self.app.log.info('JOB COMPLETED SUCCESSFULLY')
-        else:
-            raise exc.JPipesError("JOB FAILED! %s" % \
-                                  q_res['executable']['url'])
+                raise exc.JPipesError("JOB FAILED! %s" % \
+                                      q_res['executable']['url'])

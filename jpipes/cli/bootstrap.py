@@ -46,8 +46,8 @@ def load_pipeline_controllers(app):
             param = {}
             if param_def['_class'] == 'hudson.model.StringParameterDefinition':
                 param['key'] = param_def['name']
-                param['help'] = param_def['description']
                 param['default'] = param_def['defaultParameterValue']['value']
+                param['help'] = param_def['description'].lower().rstrip('.')
             else:
                 raise exc.JPipesError(
                     "Unsupported Paramater Type: %s" % param_def['_class']
@@ -64,7 +64,8 @@ def load_pipeline_controllers(app):
                     'name' : key,
                     'help' : '%s parameter' % key,
                     'default' : None,
-                    'required' : True,
+                    'required' : False,
+                    'help' : 'pipeline parameter',
                 }
 
                 # override with what's passed
@@ -76,17 +77,35 @@ def load_pipeline_controllers(app):
                     'key' : param,
                     'help' : '%s parameter' % param,
                     'default' : None,
-                    'required' : True,
+                    'required' : False,
+                    'help' : 'pipeline parameter',
                 }
 
             param = param_dict
-            argument = ( [ '--%s' % param['key'] ], 
+
+            if param['default'] in [None, ""]:
+                param['required'] = True
+            else:
+                param['help'] = "%s [default: %s]" % (
+                            param['help'].lower().rstrip('.'),
+                            param['default'].lower()
+                            )
+
+            argument = ( [ '--%s' % param['key'].lower() ], 
                          { 'help' : param['help'],
                            'dest' : param['key'],
+                           'default' : param['default'],
                            'required' : param['required'] } )
+
             pipe['arguments'].append(argument)
             pipe['param_keys'].append(param['key'])
 
+        # add a -d/--detach option
+        argument = ( [  '-d', '--detach' ], 
+                     {  'help' : 'detach from the process after job starts',
+                        'dest' : 'detach',
+                        'action' : 'store_true' } )
+        pipe['arguments'].append(argument)
         class PipelineControllerInstance(PipelineController):
             class Meta:
                 label = pipe['label']
