@@ -180,14 +180,12 @@ parameters defined in Jenkins:
 
 ```bash
 $ jpipes example-test --help
-usage: jpipes example-test [-h] --foo FOO {} ...
+usage: jpipes example-test [-h] --foo FOO ...
 
 optional arguments:
   -h, --help  show this help message and exit
   --foo FOO   the notorious foo parameter
 
-sub-commands:
-  {}
 
 $ jpipes example-test --foo=bar
 ...
