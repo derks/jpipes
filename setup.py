@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 import sys, os
 
 setup(name='jpipes',
-    version='0.9.3',
+    version='0.9.5',
     description="Jenkins Pipeline Automation",
     long_description="Jenkins Pipeline Automation",
     classifiers=[], 
